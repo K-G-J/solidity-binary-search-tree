@@ -21,6 +21,15 @@ contract BinaryTree {
 
     bytes32 private rootAddress;
 
+    //===================== MODIFIERS ===================//
+
+    modifier treeNotEmpty() {
+        if (tree[rootAddress].value == 0 || tree[rootAddress].left == 0 || tree[rootAddress].right == 0) {
+            revert TreeIsEmpty();
+        }
+        _;
+    }
+
     //===================== INSERTION ===================//
 
     /**
@@ -140,20 +149,24 @@ contract BinaryTree {
      * @notice Deletes a node from the Binary Tree
      * @param value The value to be deleted
      */
-    function deleteNode(uint256 value) public returns (Node memory removedNode) {
-        removedNode = deleteNodeHelper(value, rootAddress);
+    function deleteNode(uint256 value) public treeNotEmpty returns (Node memory removedNode) {
+        removedNode = deleteNodeHelper(value, "", rootAddress);
     }
 
     /**
      * @notice Recursive helper function for deleting a node from the tree
      * @param value The value to be deleted
+     * @param parentAddress The address of the parent node
      * @param nodeAddress The address of the current node
      */
-    function deleteNodeHelper(uint256 value, bytes32 nodeAddress) internal returns (Node memory removedNode) {
+    function deleteNodeHelper(uint256 value, bytes32 parentAddress, bytes32 nodeAddress)
+        internal
+        returns (Node memory removedNode)
+    {
         Node memory node = tree[nodeAddress];
         // If the value is equal to the current node's value, start node deletion
         if (node.value == value) {
-            removedNode = deleteLeaf(nodeAddress);
+            removedNode = deleteLeaf(parentAddress, nodeAddress);
 
             // If the value is less than the current node's value, go left
         } else if (value < node.value) {
@@ -162,7 +175,8 @@ contract BinaryTree {
                 revert ValueNotInTree();
             } else {
                 // If the left node is not empty, recursively call the function moving to the left
-                deleteNodeHelper(value, node.left);
+                // The current node becomes the parent node
+                deleteNodeHelper(value, nodeAddress, node.left);
             }
 
             // Else the value is greater than the current node's value, go right
@@ -172,20 +186,24 @@ contract BinaryTree {
                 revert ValueNotInTree();
             } else {
                 // If the right node is not empty, recursively call the function moving to the right
-                deleteNodeHelper(value, node.right);
+                // The current node becomes the parent node
+                deleteNodeHelper(value, nodeAddress, node.right);
             }
         }
     }
 
     /**
      * @notice Deletes a node (leaf) from the tree
+     * @param parentAddress The address of the parent node
      * @param nodeAddress The address of the node to be deleted
      */
-    function deleteLeaf(bytes32 nodeAddress) internal returns (Node memory node) {
+    function deleteLeaf(bytes32 parentAddress, bytes32 nodeAddress) internal returns (Node memory node) {
+        Node memory parent = tree[parentAddress];
         node = tree[nodeAddress];
 
         // If the leaf has two children, replace the leaf with the maximum left subtree value
         if (node.left != 0 && node.right != 0) {
+            // TODO: USE HELPER FUNCTIONS
             // Find the largest value in the left subtree
             bytes32 tempNodeAddress = node.left;
             while (tree[tempNodeAddress].right != 0) {
@@ -193,26 +211,42 @@ contract BinaryTree {
             }
             uint256 tempValue = tree[tempNodeAddress].value;
             // Delete the leaf with the largest value from the bottom of left subtree
-            deleteNodeHelper(tempValue, node.left);
+            deleteNodeHelper(tempValue, nodeAddress, node.left);
             // Update the leaf to have the largest value from the left subtree
-            tree[nodeAddress].value = tempValue;
+            node.value = tempValue;
+            tree[nodeAddress] = node;
 
             // If the leaf has only a left child, update the node to make parent point to left child
         } else if (node.left != 0) {
-            node.value = tree[node.left].value;
-            node.left = tree[node.left].left;
-            node.right = tree[node.left].right;
-            tree[nodeAddress] = node;
+            bytes32 leftChild = node.left;
+            if (parent.left == nodeAddress) {
+                parent.left = leftChild;
+                tree[parentAddress] = parent;
+            } else {
+                parent.right = leftChild;
+                tree[parentAddress] = parent;
+            }
 
             // If the leaf has only a right child, update the node to make parent point to right child
         } else if (node.right != 0) {
-            node.value = tree[node.right].value;
-            node.left = tree[node.right].left;
-            node.right = tree[node.right].right;
-            tree[nodeAddress] = node;
+            bytes32 rightChild = node.right;
+            if (parent.left == nodeAddress) {
+                parent.left = rightChild;
+                tree[parentAddress] = parent;
+            } else {
+                parent.right = rightChild;
+                tree[parentAddress] = parent;
+            }
 
             // If the leaf has no children, delete the node and set the parent's child pointer to null (0)
         } else {
+            if (parent.left == nodeAddress) {
+                parent.left = 0;
+                tree[parentAddress] = parent;
+            } else {
+                parent.right = 0;
+                tree[parentAddress] = parent;
+            }
             tree[nodeAddress] = Node(0, 0, 0);
         }
     }
