@@ -2,13 +2,22 @@
 pragma solidity ^0.8.19;
 
 contract BinaryTree {
+    //===================== ERRORS ===================//
+
+    error TreeIsEmpty();
+    error ValueNotInTree();
+
+    //===================== TYPES ===================//
+
     struct Node {
         uint256 value;
         bytes32 left;
         bytes32 right;
     }
 
-    mapping(bytes32 nodeAddress => Node) private tree;
+    //===================== STATE VARIABLES ===================//
+
+    mapping(bytes32 nodeAddress => Node) public tree;
 
     bytes32 private rootAddress;
 
@@ -58,7 +67,6 @@ contract BinaryTree {
         Node memory node = tree[nodeAddress];
 
         // If the value is less than the current node, insert it to the left
-        // Else the value is greater than the current node, insert it to the right
         if (value < node.value) {
             // If the value is less than the current node, check if the left node is empty
             if (node.left == 0) {
@@ -68,6 +76,8 @@ contract BinaryTree {
                 // If the left node is not empty, recursively call the function moving to the left
                 insertHelper(value, node.left);
             }
+
+            // Else the value is greater than the current node, insert it to the right
         } else {
             // If the value is greater than the current node, check if the right node is empty
             if (node.right == 0) {
@@ -130,8 +140,8 @@ contract BinaryTree {
      * @notice Deletes a node from the Binary Tree
      * @param value The value to be deleted
      */
-    function deleteNode(uint256 value) public {
-        deleteNodeHelper(value, rootAddress);
+    function deleteNode(uint256 value) public returns (Node memory removedNode) {
+        removedNode = deleteNodeHelper(value, rootAddress);
     }
 
     /**
@@ -139,25 +149,27 @@ contract BinaryTree {
      * @param value The value to be deleted
      * @param nodeAddress The address of the current node
      */
-    function deleteNodeHelper(uint256 value, bytes32 nodeAddress) internal {
+    function deleteNodeHelper(uint256 value, bytes32 nodeAddress) internal returns (Node memory removedNode) {
         Node memory node = tree[nodeAddress];
         // If the value is equal to the current node's value, start node deletion
         if (node.value == value) {
-            deleteLeaf(nodeAddress);
+            removedNode = deleteLeaf(nodeAddress);
+
             // If the value is less than the current node's value, go left
         } else if (value < node.value) {
             // If the left node is empty the value is not in the tree
             if (node.left == 0) {
-                return;
+                revert ValueNotInTree();
             } else {
                 // If the left node is not empty, recursively call the function moving to the left
                 deleteNodeHelper(value, node.left);
             }
+
             // Else the value is greater than the current node's value, go right
         } else {
             // If the right node is empty the value is not in the tree
             if (node.right == 0) {
-                return;
+                revert ValueNotInTree();
             } else {
                 // If the right node is not empty, recursively call the function moving to the right
                 deleteNodeHelper(value, node.right);
@@ -169,8 +181,8 @@ contract BinaryTree {
      * @notice Deletes a node (leaf) from the tree
      * @param nodeAddress The address of the node to be deleted
      */
-    function deleteLeaf(bytes32 nodeAddress) internal {
-        Node memory node = tree[nodeAddress];
+    function deleteLeaf(bytes32 nodeAddress) internal returns (Node memory node) {
+        node = tree[nodeAddress];
 
         // If the leaf has two children, replace the leaf with the maximum left subtree value
         if (node.left != 0 && node.right != 0) {
@@ -183,7 +195,7 @@ contract BinaryTree {
             // Delete the leaf with the largest value from the bottom of left subtree
             deleteNodeHelper(tempValue, node.left);
             // Update the leaf to have the largest value from the left subtree
-            node.value = tempValue;
+            tree[nodeAddress].value = tempValue;
 
             // If the leaf has only a left child, update the node to make parent point to left child
         } else if (node.left != 0) {
@@ -279,6 +291,10 @@ contract BinaryTree {
 
     // This function is used to test the tree, returns the nodes in the tree as a string
     function getTree() public view returns (string memory) {
+        if (tree[rootAddress].value == 0 || tree[rootAddress].left == 0 || tree[rootAddress].right == 0) {
+            revert TreeIsEmpty();
+        }
+
         string memory result;
         Node memory node;
         bytes32 tempRoot = rootAddress;
@@ -360,12 +376,11 @@ contract BinaryTree {
         }
     }
 
-    function getRoot() public view returns (uint256) {
-        if (tree[rootAddress].value != 0) {
-            return tree[rootAddress].value;
+    function getRoot() public view returns (Node memory) {
+        if (tree[rootAddress].value == 0 || tree[rootAddress].left == 0 || tree[rootAddress].right == 0) {
+            revert TreeIsEmpty();
         }
-
-        revert("Tree is empty");
+        return tree[rootAddress];
     }
 
     function getTreeSize() public view returns (uint256) {
@@ -373,6 +388,10 @@ contract BinaryTree {
     }
 
     function getTreeSizeHelper(bytes32 nodeAddress) internal view returns (uint256) {
+        if (tree[rootAddress].value == 0 || tree[rootAddress].left == 0 || tree[rootAddress].right == 0) {
+            revert TreeIsEmpty();
+        }
+
         Node memory node = tree[nodeAddress];
         if (node.left == 0 && node.right == 0) {
             return 1;
