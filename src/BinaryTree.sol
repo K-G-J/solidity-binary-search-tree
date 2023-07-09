@@ -24,7 +24,7 @@ contract BinaryTree {
     //===================== MODIFIERS ===================//
 
     modifier treeNotEmpty() {
-        if (tree[rootAddress].value == 0 || tree[rootAddress].left == 0 || tree[rootAddress].right == 0) {
+        if (tree[rootAddress].value == 0 && tree[rootAddress].left == 0 && tree[rootAddress].right == 0) {
             revert TreeIsEmpty();
         }
         _;
@@ -51,7 +51,7 @@ contract BinaryTree {
     function insert(uint256 value) external returns (bytes32) {
         Node memory root = tree[rootAddress];
         // If the tree is empty insert the value as the root
-        if (root.value == 0) {
+        if (root.value == 0 && root.left == 0 && root.right == 0) {
             root.value = value;
             root.left = 0;
             root.right = 0;
