@@ -1,6 +1,18 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.19;
 
+/**
+ * @title BinaryTree
+ * @dev This contract implements a Binary Search Tree data structure.
+ *
+ * A Binary Search Tree (BST) is a node-based binary tree data structure that has the following properties:
+ * The left subtree of a node contains only nodes with values less than the node’s value.
+ * The right subtree of a node contains only nodes with valuess greater than the node’s value.
+ * Both the left and right subtrees must also be Binary Search Trees.
+ *
+ * For this implementation, duplicate values will be allowed, and nodes with values that are the same as the root node’s will be in the root node’s right subtree.
+ */
+
 contract BinaryTree {
     //===================== ERRORS ===================//
 
@@ -140,7 +152,7 @@ contract BinaryTree {
      *  If the value is less than the current node's value, go left.
      *  If the value is greater than the current node's value, go right.
      *  If the value is equal to the current node's value, start node deletion.
-     *  If the leaf has children, replace the leaf with the child.
+     *  If the node has children, replace the node with the child.
      *  If the leaf has no children, delete the leaf.
      *  Have left preference over right when deleting.
      */
@@ -149,7 +161,7 @@ contract BinaryTree {
      * @notice Deletes a node from the Binary Tree
      * @param value The value to be deleted
      */
-    function deleteNode(uint256 value) public treeNotEmpty returns (Node memory removedNode) {
+    function deleteNode(uint256 value) external treeNotEmpty returns (Node memory removedNode) {
         removedNode = deleteNodeHelper(value, "", rootAddress);
     }
 
@@ -193,7 +205,7 @@ contract BinaryTree {
     }
 
     /**
-     * @notice Deletes a node (leaf) from the tree
+     * @notice Deletes a node from the tree
      * @param parentAddress The address of the parent node
      * @param nodeAddress The address of the node to be deleted
      */
@@ -201,7 +213,7 @@ contract BinaryTree {
         Node memory parent = tree[parentAddress];
         node = tree[nodeAddress];
 
-        // If the leaf has two children, replace the leaf with the maximum left subtree value
+        // If the node has two children, replace the node with the maximum left subtree value
         if (node.left != 0 && node.right != 0) {
             // TODO: USE HELPER FUNCTIONS
             // Find the largest value in the left subtree
@@ -212,11 +224,11 @@ contract BinaryTree {
             uint256 tempValue = tree[tempNodeAddress].value;
             // Delete the leaf with the largest value from the bottom of left subtree
             deleteNodeHelper(tempValue, nodeAddress, node.left);
-            // Update the leaf to have the largest value from the left subtree
+            // Update the node to have the largest value from the left subtree
             node.value = tempValue;
             tree[nodeAddress] = node;
 
-            // If the leaf has only a left child, update the node to make parent point to left child
+            // If the node has only a left child, update to make parent point to left child
         } else if (node.left != 0) {
             bytes32 leftChild = node.left;
             if (parent.left == nodeAddress) {
@@ -227,7 +239,7 @@ contract BinaryTree {
                 tree[parentAddress] = parent;
             }
 
-            // If the leaf has only a right child, update the node to make parent point to right child
+            // If the node has only a right child, update to make parent point to right child
         } else if (node.right != 0) {
             bytes32 rightChild = node.right;
             if (parent.left == nodeAddress) {
@@ -238,7 +250,7 @@ contract BinaryTree {
                 tree[parentAddress] = parent;
             }
 
-            // If the leaf has no children, delete the node and set the parent's child pointer to null (0)
+            // If the leaf has no children, delete the leaf and set the parent's child pointer to null (0)
         } else {
             if (parent.left == nodeAddress) {
                 parent.left = 0;
@@ -253,98 +265,112 @@ contract BinaryTree {
 
     //===================== TRAVERSAL ===================//
 
-    /* 
-        * These are traversal functions.
-            - Preorder traversal (O(n)):
-                - Start at the root node (rootAddress)
-                - Visit the node
-                - Traverse the left subtree
-                - Traverse the right subtree
-            - Inorder traversal (O(n)):
-                - Start at the root node (rootAddress)
-                - Traverse the left subtree
-                - Visit the node
-                - Traverse the right subtree
-            - Postorder traversal (O(n)):
-                - Start at the root node (rootAddress)
-                - Traverse the left subtree
-                - Traverse the right subtree
-                - Visit the node
-    */
-
-    // inorder traversal
-    function displayInOrder() public {
-        displayInOrderHelper(rootAddress);
+    /**
+     *  Preorder traversal (O(n)):
+     *      Visit the root.
+     *      Traverse the left subtree, i.e., call Preorder(left->subtree)
+     *      Traverse the right subtree, i.e., call Preorder(right->subtree)
+     *
+     * @return An array of the values in the tree preorder
+     */
+    function displayPreOrder() external treeNotEmpty returns (uint256[] memory) {
+        return displayPreOrderHelper(rootAddress, 0);
     }
 
-    // recursive helper function for inorder traversal
-    function displayInOrderHelper(bytes32 nodeAddress) internal {
+    /**
+     * @notice Recursive helper function for preorder traversal
+     * @param nodeAddress The address of the current node
+     * @param index The index of the current node value in return array
+     * @return An array of the values in the tree in preorder
+     */
+    function displayPreOrderHelper(bytes32 nodeAddress, uint256 index) internal returns (uint256[] memory) {
         Node memory node = tree[nodeAddress];
+        uint256 size = getTreeSize();
+        uint256[] memory values = new uint256[](size);
+        // Add the current node value to the array (0 will be the root)
+        values[index] = node.value;
+        // Keep traversing the left subtrees
         if (node.left != 0) {
-            displayInOrderHelper(node.left);
+            displayPreOrderHelper(node.left, index + 1);
         }
-        // console.log(node.value);
+        // After, traverse the right subtrees
         if (node.right != 0) {
-            displayInOrderHelper(node.right);
+            displayPreOrderHelper(node.right, index + 1);
         }
+        return values;
     }
 
-    // preorder traversal
-    function displayPreOrder() public {
-        displayPreOrderHelper(rootAddress);
+    /**
+     *  Inorder traversal (O(n)):
+     *      Traverse the left subtree, i.e., call Inorder(left->subtree)
+     *      Visit the root.
+     *      Traverse the right subtree, i.e., call Inorder(right->subtree)
+     *
+     * @return An array of the values in the tree inorder
+     * @dev Values are displayed in sorted order from the smallest to the largest value.
+     */
+    function displayInOrder() external treeNotEmpty returns (uint256[] memory) {
+        return displayInOrderHelper(rootAddress, 0);
     }
 
-    // recursive helper function for preorder traversal
-    function displayPreOrderHelper(bytes32 nodeAddress) internal {
+    /**
+     * @notice A recursive helper function for displaying the values in the tree inorder
+     * @param nodeAddress The address of the current node
+     * @param index The index of the current node value in return array
+     */
+    function displayInOrderHelper(bytes32 nodeAddress, uint256 index) internal returns (uint256[] memory) {
         Node memory node = tree[nodeAddress];
-        // console.log(node.value);
+        uint256 size = getTreeSize();
+        uint256[] memory values = new uint256[](size);
+        // Keep traversing the left subtrees
         if (node.left != 0) {
-            displayPreOrderHelper(node.left);
+            displayInOrderHelper(node.left, index + 1);
         }
+        // Add the current node value to the array
+        values[index - 1] = node.value;
+        // After, traverse the right subtrees
         if (node.right != 0) {
-            displayPreOrderHelper(node.right);
+            displayInOrderHelper(node.right, index + 1);
         }
+        return values;
     }
 
-    // post order traversal
-    function displayPostOrder() public {
-        displayPostOrderHelper(rootAddress);
+    /**
+     *  Postorder traversal (O(n)):
+     *      Traverse the left subtree, i.e., call Postorder(left->subtree)
+     *      Traverse the right subtree, i.e., call Postorder(right->subtree)
+     *      Visit the root
+     *
+     * @notice Displays the values in the tree postorder
+     * @return An array of the values in the tree postorder
+     */
+    function displayPostOrder() external treeNotEmpty returns (uint256[] memory) {
+        return displayPostOrderHelper(rootAddress, 0);
     }
 
-    // recursive helper function for postorder traversal
-    function displayPostOrderHelper(bytes32 nodeAddress) internal {
+    /**
+     * @notice A recursive helper function for displaying the values in the tree postorder
+     * @param nodeAddress The address of the current node
+     * @param index The index of the current node value in return array
+     */
+    function displayPostOrderHelper(bytes32 nodeAddress, uint256 index) internal returns (uint256[] memory) {
         Node memory node = tree[nodeAddress];
+        uint256 size = getTreeSize();
+        uint256[] memory values = new uint256[](size);
+        // Keep traversing the left subtrees
         if (node.left != 0) {
-            displayPostOrderHelper(node.left);
+            displayPostOrderHelper(node.left, index + 1);
         }
+        // After, traverse the right subtrees
         if (node.right != 0) {
-            displayPostOrderHelper(node.right);
+            displayPostOrderHelper(node.right, index + 1);
         }
-        // console.log(node.value);
+        // Add the current node value to the array
+        values[index - 1] = node.value;
+        return values;
     }
 
-    // This function is used to test the tree, returns the nodes in the tree as a string
-    function getTree() public view returns (string memory) {
-        if (tree[rootAddress].value == 0 || tree[rootAddress].left == 0 || tree[rootAddress].right == 0) {
-            revert TreeIsEmpty();
-        }
-
-        string memory result;
-        Node memory node;
-        bytes32 tempRoot = rootAddress;
-        node = tree[tempRoot];
-        while (node.left != 0 || node.right != 0) {
-            node = tree[tempRoot];
-            result = string(abi.encodePacked(result, " ", node.value));
-            if (node.left != 0) {
-                tempRoot = node.left;
-            } else {
-                tempRoot = node.right;
-            }
-        }
-
-        return result;
-    }
+    //===================== SEARCHING ===================//
 
     /*
         These are search functions.
@@ -381,10 +407,9 @@ contract BinaryTree {
         }
     }
 
-    /*
-        - Here are some other functions that occasionally accompany tree implementations.
-    */
-    function findMin() public view returns (uint256) {
+    //===================== GETTERS ===================//
+
+    function getMin() public view treeNotEmpty returns (uint256) {
         return findMinHelper(rootAddress);
     }
 
@@ -397,7 +422,7 @@ contract BinaryTree {
         }
     }
 
-    function findMax() public view returns (uint256) {
+    function getMax() public view treeNotEmpty returns (uint256) {
         return findMaxHelper(rootAddress);
     }
 
@@ -410,22 +435,34 @@ contract BinaryTree {
         }
     }
 
-    function getRoot() public view returns (Node memory) {
-        if (tree[rootAddress].value == 0 || tree[rootAddress].left == 0 || tree[rootAddress].right == 0) {
-            revert TreeIsEmpty();
+    // This function is used to test the tree, returns the nodes in the tree as a string
+    function getTree() public view treeNotEmpty returns (string memory) {
+        string memory result;
+        Node memory node;
+        bytes32 tempRoot = rootAddress;
+        node = tree[tempRoot];
+        while (node.left != 0 || node.right != 0) {
+            node = tree[tempRoot];
+            result = string(abi.encodePacked(result, " ", node.value));
+            if (node.left != 0) {
+                tempRoot = node.left;
+            } else {
+                tempRoot = node.right;
+            }
         }
+
+        return result;
+    }
+
+    function getRoot() public view treeNotEmpty returns (Node memory) {
         return tree[rootAddress];
     }
 
-    function getTreeSize() public view returns (uint256) {
+    function getTreeSize() public view treeNotEmpty returns (uint256) {
         return getTreeSizeHelper(rootAddress);
     }
 
     function getTreeSizeHelper(bytes32 nodeAddress) internal view returns (uint256) {
-        if (tree[rootAddress].value == 0 || tree[rootAddress].left == 0 || tree[rootAddress].right == 0) {
-            revert TreeIsEmpty();
-        }
-
         Node memory node = tree[nodeAddress];
         if (node.left == 0 && node.right == 0) {
             return 1;
@@ -441,4 +478,22 @@ contract BinaryTree {
     }
 
     // TODO: GET TREE HEIGHT
+
+    //===================== VALIDATION ===================//
+
+    //===================== INVERSRION ===================//
+
+    /**
+     * An inverted form of a Binary Tree is another Binary Tree with left and right children of all non-leaf nodes interchanged. You may also call it the mirror of the input tree.
+     * If you invert a Binary Search Tree is will no longer be a valid Binary Search Tree.
+     */
+
+    /*
+        * These are inversion functions.
+            - Invert the tree (average log(n)), worst case O(n)):
+                - Start at the root node (rootAddress)
+                - Invert the left subtree
+                - Invert the right subtree
+                - Swap the left and right pointers
+    */
 }
