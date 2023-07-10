@@ -154,7 +154,7 @@ contract BinaryTree {
      *  If the value is equal to the current node's value, start node deletion.
      *  If the node has children, replace the node with the child.
      *  If the leaf has no children, delete the leaf.
-     *  Have left preference over right when deleting.
+     *  Have right preference over left when deleting.
      */
 
     /**
@@ -215,39 +215,38 @@ contract BinaryTree {
 
         // If the node has two children, replace the node with the maximum left subtree value
         if (node.left != 0 && node.right != 0) {
-            // TODO: USE HELPER FUNCTIONS
-            // Find the largest value in the left subtree
-            bytes32 tempNodeAddress = node.left;
-            while (tree[tempNodeAddress].right != 0) {
-                tempNodeAddress = tree[tempNodeAddress].right;
-            }
-            uint256 tempValue = tree[tempNodeAddress].value;
-            // Delete the leaf with the largest value from the bottom of left subtree
-            deleteNodeHelper(tempValue, nodeAddress, node.left);
-            // Update the node to have the largest value from the left subtree
-            node.value = tempValue;
+            // Find the minimum value in the right subtree
+            uint256 minRightValue = findMin(node.right);
+            // Delete the leaf with the minimum value from the right subtree
+            deleteNodeHelper(minRightValue, nodeAddress, node.left);
+            // Update the node to have the minimum value from the right subtree
+            node.value = minRightValue;
             tree[nodeAddress] = node;
 
-            // If the node has only a left child, update to make parent point to left child
+            // If the node has only a left child, update so parent points to left child and set the node to null (0)
         } else if (node.left != 0) {
             bytes32 leftChild = node.left;
             if (parent.left == nodeAddress) {
                 parent.left = leftChild;
                 tree[parentAddress] = parent;
+                tree[nodeAddress] = Node(0, 0, 0);
             } else {
                 parent.right = leftChild;
                 tree[parentAddress] = parent;
+                tree[nodeAddress] = Node(0, 0, 0);
             }
 
-            // If the node has only a right child, update to make parent point to right child
+            // If the node has only a right child, update so parent points to right child and set the node to null (0)
         } else if (node.right != 0) {
             bytes32 rightChild = node.right;
             if (parent.left == nodeAddress) {
                 parent.left = rightChild;
                 tree[parentAddress] = parent;
+                tree[nodeAddress] = Node(0, 0, 0);
             } else {
                 parent.right = rightChild;
                 tree[parentAddress] = parent;
+                tree[nodeAddress] = Node(0, 0, 0);
             }
 
             // If the leaf has no children, delete the leaf and set the parent's child pointer to null (0)
@@ -259,6 +258,7 @@ contract BinaryTree {
                 parent.right = 0;
                 tree[parentAddress] = parent;
             }
+            // Set the node to null (0)
             tree[nodeAddress] = Node(0, 0, 0);
         }
     }
@@ -372,35 +372,48 @@ contract BinaryTree {
 
     //===================== SEARCHING ===================//
 
-    /*
-        These are search functions.
-            - Search for a value in the tree (average log(n)), worst case O(n)):
-                - Start at the root node (rootAddress)
-                - If the value is less than the current node, traverse the left subtree
-                - If the value is greater than the current node, traverse the right subtree
-                - If the value is equal to the current node, return true
-                - If the value is not in the tree, return false
-    */
-
-    // search for a value in the tree
-    function findElement(uint256 value) public view returns (bool) {
+    /**
+     *  Search for a value in the tree (average log(n), worst case O(n)):
+     *      Start at the root node (rootAddress)
+     *      If the value is less than the current node, traverse the left subtree
+     *      If the value is greater than the current node, traverse the right subtree
+     *      If the value is equal to the current node, return true and the node
+     *      If the value is not in the tree, revert
+     *
+     * @notice Searches for a value in the tree
+     * @param value The value to be searched for
+     * @return True if the value is in the tree
+     * @return The node if the value is in the tree
+     */
+    function findElement(uint256 value) public view returns (bool, Node memory) {
         return findElementHelper(value, rootAddress);
     }
 
-    // recursive helper function for findElement
-    function findElementHelper(uint256 value, bytes32 nodeAddress) internal view returns (bool) {
+    /**
+     * @notice Recursive helper function for searching for a value in the tree
+     * @param value The value to be searched for
+     * @param nodeAddress The address of the current node
+     * @return True if the value is in the tree
+     * @return The node if the value is in the tree
+     */
+    function findElementHelper(uint256 value, bytes32 nodeAddress) internal view returns (bool, Node memory) {
         Node memory node = tree[nodeAddress];
+        // If the value is equal to the current node, return true and the node
         if (node.value == value) {
-            return true;
-        } else if (node.value > value) {
+            return (true, node);
+
+            // If the value is less than the current node, traverse the left subtree
+        } else if (value < node.value) {
             if (node.left == 0) {
-                return false;
+                revert ValueNotInTree();
             } else {
                 return findElementHelper(value, node.left);
             }
+
+            // If the value is greater than the current node, traverse the right subtree
         } else {
             if (node.right == 0) {
-                return false;
+                revert ValueNotInTree();
             } else {
                 return findElementHelper(value, node.right);
             }
@@ -409,38 +422,62 @@ contract BinaryTree {
 
     //===================== GETTERS ===================//
 
-    function getMin() public view treeNotEmpty returns (uint256) {
-        return findMinHelper(rootAddress);
+    /**
+     * @notice Returns the minimum value in the tree
+     */
+    function getMin() external view treeNotEmpty returns (uint256) {
+        return findMin(rootAddress);
     }
 
-    function findMinHelper(bytes32 nodeAddress) internal view returns (uint256) {
+    /**
+     * @notice Recursive helper function for finding the minimum value in the tree from a given node
+     * @param nodeAddress The address of the current node
+     */
+    function findMin(bytes32 nodeAddress) public view returns (uint256) {
         Node memory node = tree[nodeAddress];
+        // If the left node is empty, the current node is the minimum value
         if (node.left == 0) {
             return node.value;
+            // Else keep traversing the left subtrees
         } else {
-            return findMinHelper(node.left);
+            return findMin(node.left);
         }
     }
 
-    function getMax() public view treeNotEmpty returns (uint256) {
-        return findMaxHelper(rootAddress);
+    /**
+     * @notice Returns the maximum value in the tree
+     */
+    function getMax() external view treeNotEmpty returns (uint256) {
+        return findMax(rootAddress);
     }
 
-    function findMaxHelper(bytes32 nodeAddress) internal view returns (uint256) {
+    /**
+     * @notice Recursive helper function for finding the maximum value in the tree from a given node
+     * @param nodeAddress The address of the current node
+     */
+    function findMax(bytes32 nodeAddress) public view returns (uint256) {
         Node memory node = tree[nodeAddress];
+        // If the right node is empty, the current node is the maximum value
         if (node.right == 0) {
             return node.value;
+            // Else keep traversing the right subtrees
         } else {
-            return findMaxHelper(node.right);
+            return findMax(node.right);
         }
     }
 
-    // This function is used to test the tree, returns the nodes in the tree as a string
+    /**
+     * @notice Returns the tree as a string
+     */
     function getTree() public view treeNotEmpty returns (string memory) {
+        if (getTreeSize() == 1) {
+            return string(abi.encodePacked(tree[rootAddress].value));
+        }
         string memory result;
         Node memory node;
         bytes32 tempRoot = rootAddress;
         node = tree[tempRoot];
+        // While the left or right node is not empty, traverse the tree
         while (node.left != 0 || node.right != 0) {
             node = tree[tempRoot];
             result = string(abi.encodePacked(result, " ", node.value));
