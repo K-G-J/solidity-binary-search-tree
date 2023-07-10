@@ -1,5 +1,8 @@
 //SPDX-License-Identifier: Unlicense
+
 pragma solidity ^0.8.19;
+
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 /**
  * @title BinaryTree
@@ -45,18 +48,15 @@ contract BinaryTree {
     //===================== INSERTION ===================//
 
     /**
-     *  Insertion (average log(n)), worst case O(n))
-     *
-     *  Start at the root node (rootAddress)
-     *  If the value is less than the current node's value, go left.
-     *  If the value is greater than the current node's value, go right.
-     *  Generate ID for the new node.
-     *  Insert the new node into the tree via the ID.
-     *  Returns the address of the new node.
-     */
-
-    /**
      * @notice Inserts a node into the Binary Tree
+     *
+     *  Insertion (average log(n), worst case O(n)):
+     *      - Start at the root node (rootAddress)
+     *      - If the value is less than the current node's value, go left.
+     *      - If the value is greater than the current node's value, go right.
+     *      - Generate ID for the new node.
+     *      - Insert the new node into the tree via the ID.
+     *
      * @param value The value to be inserted
      * @return The address of the new node
      */
@@ -146,19 +146,17 @@ contract BinaryTree {
     //===================== DELETION ===================//
 
     /**
-     *  Deletion (average log(n)), worst case O(n)
+     *  @notice Deletes a node from the Binary Tree
      *
-     *  Start at the root node (rootAddress)
-     *  If the value is less than the current node's value, go left.
-     *  If the value is greater than the current node's value, go right.
-     *  If the value is equal to the current node's value, start node deletion.
-     *  If the node has children, replace the node with the child.
-     *  If the leaf has no children, delete the leaf.
-     *  Have right preference over left when deleting.
-     */
-
-    /**
-     * @notice Deletes a node from the Binary Tree
+     *  Deletion (average log(n), worst case O(n)):
+     *      - Start at the root node (rootAddress)
+     *      - If the value is less than the current node's value, go left.
+     *      - If the value is greater than the current node's value, go right.
+     *      - If the value is equal to the current node's value, start node deletion.
+     *      - If the node has children, replace the node with the child.
+     *      - If the leaf has no children, delete the leaf.
+     *      - Have right preference over left when deleting.
+     *
      * @param value The value to be deleted
      */
     function deleteNode(uint256 value) external treeNotEmpty returns (Node memory removedNode) {
@@ -266,10 +264,12 @@ contract BinaryTree {
     //===================== TRAVERSAL ===================//
 
     /**
-     *  Preorder traversal (O(n)):
-     *      Visit the root.
-     *      Traverse the left subtree, i.e., call Preorder(left->subtree)
-     *      Traverse the right subtree, i.e., call Preorder(right->subtree)
+     * @notice Displays the values in the tree preorder
+     *
+     * Preorder traversal (O(n)):
+     *      - Visit the root
+     *      - Traverse the left subtree, i.e., call Preorder(left->subtree)
+     *      - Traverse the right subtree, i.e., call Preorder(right->subtree)
      *
      * @return An array of the values in the tree preorder
      */
@@ -301,10 +301,12 @@ contract BinaryTree {
     }
 
     /**
-     *  Inorder traversal (O(n)):
-     *      Traverse the left subtree, i.e., call Inorder(left->subtree)
-     *      Visit the root.
-     *      Traverse the right subtree, i.e., call Inorder(right->subtree)
+     * @notice Displays the values in the tree inorder
+     *
+     * Inorder traversal (O(n)):
+     *      - Traverse the left subtree, i.e., call Inorder(left->subtree)
+     *      - Visit the root
+     *      - Traverse the right subtree, i.e., call Inorder(right->subtree)
      *
      * @return An array of the values in the tree inorder
      * @dev Values are displayed in sorted order from the smallest to the largest value.
@@ -336,12 +338,13 @@ contract BinaryTree {
     }
 
     /**
-     *  Postorder traversal (O(n)):
-     *      Traverse the left subtree, i.e., call Postorder(left->subtree)
-     *      Traverse the right subtree, i.e., call Postorder(right->subtree)
-     *      Visit the root
+     *  @notice Displays the values in the tree postorder
      *
-     * @notice Displays the values in the tree postorder
+     *  Postorder traversal (O(n)):
+     *      - Traverse the left subtree, i.e., call Postorder(left->subtree)
+     *      - Traverse the right subtree, i.e., call Postorder(right->subtree)
+     *      - Visit the root
+     *
      * @return An array of the values in the tree postorder
      */
     function displayPostOrder() external treeNotEmpty returns (uint256[] memory) {
@@ -373,14 +376,15 @@ contract BinaryTree {
     //===================== SEARCHING ===================//
 
     /**
-     *  Search for a value in the tree (average log(n), worst case O(n)):
-     *      Start at the root node (rootAddress)
-     *      If the value is less than the current node, traverse the left subtree
-     *      If the value is greater than the current node, traverse the right subtree
-     *      If the value is equal to the current node, return true and the node
-     *      If the value is not in the tree, revert
-     *
      * @notice Searches for a value in the tree
+     *
+     *  Search for a value in the tree (average log(n), worst case O(n)):
+     *      - Start at the root node (rootAddress)
+     *      - If the value is less than the current node, traverse the left subtree
+     *      - If the value is greater than the current node, traverse the right subtree
+     *      - If the value is equal to the current node, return true and the node
+     *      - If the value is not in the tree, revert
+     *
      * @param value The value to be searched for
      * @return True if the value is in the tree
      * @return The node if the value is in the tree
@@ -467,58 +471,101 @@ contract BinaryTree {
     }
 
     /**
-     * @notice Returns the tree as a string
+     * @notice Constructs a string consisting of parenthesis and values from the binary tree with preorder traversal (root, left subtree, right subtree)
+     * @dev Omits all the empty parenthesis pairs that do not affect the one-to-one mapping relationship between the string and the original binary tree.
      */
-    function getTree() public view treeNotEmpty returns (string memory) {
-        if (getTreeSize() == 1) {
-            return string(abi.encodePacked(tree[rootAddress].value));
-        }
-        string memory result;
-        Node memory node;
-        bytes32 tempRoot = rootAddress;
-        node = tree[tempRoot];
-        // While the left or right node is not empty, traverse the tree
-        while (node.left != 0 || node.right != 0) {
-            node = tree[tempRoot];
-            result = string(abi.encodePacked(result, " ", node.value));
-            if (node.left != 0) {
-                tempRoot = node.left;
-            } else {
-                tempRoot = node.right;
-            }
-        }
-
-        return result;
+    function getTree() external view treeNotEmpty returns (string memory) {
+        return treeToString(rootAddress);
     }
 
+    /**
+     * @notice Recursive helper function for converting the tree to a string with preorder traversal
+     *
+     *         - For each non-null node, append the node value to the string
+     *         - For each non-leaf node append a pair of parentheses that encloses the preorder
+     *         string of its child nodes.
+     *         - If a node has a right child but no left child, include a pair of parentheses for
+     *         the left null child.
+     *
+     * @param nodeAddress The address of the current node
+     * @return The tree as a string with () for empty nodes
+     */
+    function treeToString(bytes32 nodeAddress) internal view returns (string memory) {
+        // If only root, return the root value as a string
+        if (getTreeSize() == 1) {
+            uint256 rootValue = tree[rootAddress].value;
+            return Strings.toString(rootValue);
+        }
+        // Else recursively add the left and right children to the string in parenthesis
+        Node memory node = tree[nodeAddress];
+        string memory treeString = Strings.toString(node.value);
+        // If the node has a left child, add the left child to the string in parenthesis recursively
+        if (node.left != 0) {
+            treeString = string(abi.encodePacked(treeString, "(", treeToString(node.left), ")"));
+        }
+        // If the node has a right child, add the right child to the string in parenthesis recursively
+        if (node.right != 0) {
+            // If the node has a right child but no left child, add empty parenthesis to the string
+            if (node.left == 0) {
+                treeString = string(abi.encodePacked(treeString, "()"));
+            }
+            // Add the right child to the string in parenthesis recursively
+            treeString = string(abi.encodePacked(treeString, "(", treeToString(node.right), ")"));
+        }
+        return treeString;
+    }
+
+    /**
+     * @notice Returns the root node of the tree
+     */
     function getRoot() public view treeNotEmpty returns (Node memory) {
         return tree[rootAddress];
     }
 
+    /**
+     * @notice Returns the size of the tree (number of nodes)
+     */
     function getTreeSize() public view treeNotEmpty returns (uint256) {
         return getTreeSizeHelper(rootAddress);
     }
 
+    /**
+     * @notice Recursive helper function for finding the size of the tree
+     *
+     *      - Traverse all nodes of the tree (following a depth-first search pattern)
+     *      - Sum up the count of nodes in the tree
+     *
+     * @param nodeAddress The address of the current node
+     */
     function getTreeSizeHelper(bytes32 nodeAddress) internal view returns (uint256) {
         Node memory node = tree[nodeAddress];
+        // If leaf node, having no children, return 1 representing this single node.
         if (node.left == 0 && node.right == 0) {
             return 1;
+            // Else recursively call the function on the left and right subtrees
         } else {
+            // If no left child, add 1 for current node to the count of nodes in the right subtree.
             if (node.left == 0) {
                 return 1 + getTreeSizeHelper(node.right);
+                // If no right child, add 1 for current node to the count of nodes in the left subtree.
             } else if (node.right == 0) {
                 return 1 + getTreeSizeHelper(node.left);
+                // If both left and right children, add 1 for current node to the count of nodes in both subtrees
             } else {
                 return 1 + getTreeSizeHelper(node.left) + getTreeSizeHelper(node.right);
             }
         }
     }
 
-    // TODO: GET TREE HEIGHT
+    // TODO: GET TREE HEIGHT FUNCTION
 
     //===================== VALIDATION ===================//
 
+    // TODO: VALIDATE TREE FUNCTION
+
     //===================== INVERSRION ===================//
+
+    // TODO: INVERT TREE FUNCTION
 
     /**
      * An inverted form of a Binary Tree is another Binary Tree with left and right children of all non-leaf nodes interchanged. You may also call it the mirror of the input tree.
