@@ -532,7 +532,7 @@ contract BinaryTree {
     /**
      * @notice Recursive helper function for finding the size of the tree
      *
-     *      - Traverse all nodes of the tree (following a depth-first search pattern)
+     *      - Traverse all nodes of the tree following a depth-first search pattern (O(n))
      *      - Sum up the count of nodes in the tree
      *
      * @param nodeAddress The address of the current node
