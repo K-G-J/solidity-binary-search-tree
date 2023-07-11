@@ -265,25 +265,25 @@ contract BinaryTree {
 
     /**
      * @notice Displays the values in the tree preorder
-     *
-     * Preorder traversal (O(n)):
-     *      - Visit the root
-     *      - Traverse the left subtree, i.e., call Preorder(left->subtree)
-     *      - Traverse the right subtree, i.e., call Preorder(right->subtree)
-     *
      * @return An array of the values in the tree preorder
      */
-    function displayPreOrder() external treeNotEmpty returns (uint256[] memory) {
-        return displayPreOrderHelper(rootAddress, 0);
+    function displayPreorder() external treeNotEmpty returns (uint256[] memory) {
+        return displayPreorderHelper(rootAddress, 0);
     }
 
     /**
      * @notice Recursive helper function for preorder traversal
+     *
+     *  Preorder traversal (O(n)):
+     *      - Visit the root
+     *      - Traverse the left subtree, i.e., call Preorder(left->subtree)
+     *      - Traverse the right subtree, i.e., call Preorder(right->subtree)
+     *
      * @param nodeAddress The address of the current node
      * @param index The index of the current node value in return array
      * @return An array of the values in the tree in preorder
      */
-    function displayPreOrderHelper(bytes32 nodeAddress, uint256 index) internal returns (uint256[] memory) {
+    function displayPreorderHelper(bytes32 nodeAddress, uint256 index) internal returns (uint256[] memory) {
         Node memory node = tree[nodeAddress];
         uint256 size = getTreeSize();
         uint256[] memory values = new uint256[](size);
@@ -291,82 +291,84 @@ contract BinaryTree {
         values[index] = node.value;
         // Keep traversing the left subtrees
         if (node.left != 0) {
-            displayPreOrderHelper(node.left, index + 1);
+            displayPreorderHelper(node.left, index + 1);
         }
         // After, traverse the right subtrees
         if (node.right != 0) {
-            displayPreOrderHelper(node.right, index + 1);
+            displayPreorderHelper(node.right, index + 1);
         }
         return values;
     }
 
     /**
      * @notice Displays the values in the tree inorder
-     *
-     * Inorder traversal (O(n)):
-     *      - Traverse the left subtree, i.e., call Inorder(left->subtree)
-     *      - Visit the root
-     *      - Traverse the right subtree, i.e., call Inorder(right->subtree)
-     *
-     * @return An array of the values in the tree inorder
      * @dev Values are displayed in sorted order from the smallest to the largest value.
+     * @return An array of the values in the tree inorder
      */
-    function displayInOrder() external treeNotEmpty returns (uint256[] memory) {
-        return displayInOrderHelper(rootAddress, 0);
+    function displayInorder() external treeNotEmpty returns (uint256[] memory) {
+        return displayInorderHelper(rootAddress, 0);
     }
 
     /**
      * @notice A recursive helper function for displaying the values in the tree inorder
+     *
+     *  Inorder traversal (O(n)):
+     *      - Traverse the left subtree, i.e., call Inorder(left->subtree)
+     *      - Visit the root
+     *      - Traverse the right subtree, i.e., call Inorder(right->subtree)
+     *
      * @param nodeAddress The address of the current node
      * @param index The index of the current node value in return array
+     * @return An array of the values in the tree inorder
      */
-    function displayInOrderHelper(bytes32 nodeAddress, uint256 index) internal returns (uint256[] memory) {
+    function displayInorderHelper(bytes32 nodeAddress, uint256 index) internal returns (uint256[] memory) {
         Node memory node = tree[nodeAddress];
         uint256 size = getTreeSize();
         uint256[] memory values = new uint256[](size);
         // Keep traversing the left subtrees
         if (node.left != 0) {
-            displayInOrderHelper(node.left, index + 1);
+            displayInorderHelper(node.left, index + 1);
         }
         // Add the current node value to the array
         values[index - 1] = node.value;
         // After, traverse the right subtrees
         if (node.right != 0) {
-            displayInOrderHelper(node.right, index + 1);
+            displayInorderHelper(node.right, index + 1);
         }
         return values;
     }
 
     /**
-     *  @notice Displays the values in the tree postorder
+     * @notice Displays the values in the tree postorder
+     * @return An array of the values in the tree postorder
+     */
+    function displayPostorder() external treeNotEmpty returns (uint256[] memory) {
+        return displayPostorderHelper(rootAddress, 0);
+    }
+
+    /**
+     * @notice A recursive helper function for displaying the values in the tree postorder
      *
      *  Postorder traversal (O(n)):
      *      - Traverse the left subtree, i.e., call Postorder(left->subtree)
      *      - Traverse the right subtree, i.e., call Postorder(right->subtree)
      *      - Visit the root
      *
-     * @return An array of the values in the tree postorder
-     */
-    function displayPostOrder() external treeNotEmpty returns (uint256[] memory) {
-        return displayPostOrderHelper(rootAddress, 0);
-    }
-
-    /**
-     * @notice A recursive helper function for displaying the values in the tree postorder
      * @param nodeAddress The address of the current node
      * @param index The index of the current node value in return array
+     * @return An array of the values in the tree postorder
      */
-    function displayPostOrderHelper(bytes32 nodeAddress, uint256 index) internal returns (uint256[] memory) {
+    function displayPostorderHelper(bytes32 nodeAddress, uint256 index) internal returns (uint256[] memory) {
         Node memory node = tree[nodeAddress];
         uint256 size = getTreeSize();
         uint256[] memory values = new uint256[](size);
         // Keep traversing the left subtrees
         if (node.left != 0) {
-            displayPostOrderHelper(node.left, index + 1);
+            displayPostorderHelper(node.left, index + 1);
         }
         // After, traverse the right subtrees
         if (node.right != 0) {
-            displayPostOrderHelper(node.right, index + 1);
+            displayPostorderHelper(node.right, index + 1);
         }
         // Add the current node value to the array
         values[index - 1] = node.value;
@@ -377,24 +379,24 @@ contract BinaryTree {
 
     /**
      * @notice Searches for a value in the tree
+     * @param value The value to be searched for
+     * @return True if the value is in the tree
+     * @return The node if the value is in the tree
+     */
+    function findElement(uint256 value) external view treeNotEmpty returns (bool, Node memory) {
+        return findElementHelper(value, rootAddress);
+    }
+
+    /**
+     * @notice Recursive helper function for searching for a value in the tree
      *
-     *  Search for a value in the tree (average log(n), worst case O(n)):
+     *      - Search for a value in the tree (average log(n), worst case O(n)):
      *      - Start at the root node (rootAddress)
      *      - If the value is less than the current node, traverse the left subtree
      *      - If the value is greater than the current node, traverse the right subtree
      *      - If the value is equal to the current node, return true and the node
      *      - If the value is not in the tree, revert
      *
-     * @param value The value to be searched for
-     * @return True if the value is in the tree
-     * @return The node if the value is in the tree
-     */
-    function findElement(uint256 value) public view returns (bool, Node memory) {
-        return findElementHelper(value, rootAddress);
-    }
-
-    /**
-     * @notice Recursive helper function for searching for a value in the tree
      * @param value The value to be searched for
      * @param nodeAddress The address of the current node
      * @return True if the value is in the tree
@@ -436,8 +438,9 @@ contract BinaryTree {
     /**
      * @notice Recursive helper function for finding the minimum value in the tree from a given node
      * @param nodeAddress The address of the current node
+     * @return The minimum value in the tree
      */
-    function findMin(bytes32 nodeAddress) public view returns (uint256) {
+    function findMin(bytes32 nodeAddress) public view treeNotEmpty returns (uint256) {
         Node memory node = tree[nodeAddress];
         // If the left node is empty, the current node is the minimum value
         if (node.left == 0) {
@@ -458,8 +461,9 @@ contract BinaryTree {
     /**
      * @notice Recursive helper function for finding the maximum value in the tree from a given node
      * @param nodeAddress The address of the current node
+     * @return The maximum value in the tree
      */
-    function findMax(bytes32 nodeAddress) public view returns (uint256) {
+    function findMax(bytes32 nodeAddress) public view treeNotEmpty returns (uint256) {
         Node memory node = tree[nodeAddress];
         // If the right node is empty, the current node is the maximum value
         if (node.right == 0) {
@@ -473,6 +477,7 @@ contract BinaryTree {
     /**
      * @notice Constructs a string consisting of parenthesis and values from the binary tree with preorder traversal (root, left subtree, right subtree)
      * @dev Omits all the empty parenthesis pairs that do not affect the one-to-one mapping relationship between the string and the original binary tree.
+     * @return The tree as a string with () for empty nodes
      */
     function getTree() external view treeNotEmpty returns (string memory) {
         return treeToString(rootAddress);
@@ -481,11 +486,12 @@ contract BinaryTree {
     /**
      * @notice Recursive helper function for converting the tree to a string with preorder traversal
      *
-     *         - For each non-null node, append the node value to the string
-     *         - For each non-leaf node append a pair of parentheses that encloses the preorder
-     *         string of its child nodes.
-     *         - If a node has a right child but no left child, include a pair of parentheses for
-     *         the left null child.
+     *      - Preorder traverse all nodes of the tree following a depth-first search pattern (O(n))
+     *      - For each non-null node, append the node value to the string
+     *      - For each non-leaf node append a pair of parentheses that encloses the preorder
+     *        string of its child nodes.
+     *      - If a node has a right child but no left child, include a pair of parentheses for
+     *        the left null child.
      *
      * @param nodeAddress The address of the current node
      * @return The tree as a string with () for empty nodes
@@ -518,26 +524,30 @@ contract BinaryTree {
     /**
      * @notice Returns the root node of the tree
      */
-    function getRoot() public view treeNotEmpty returns (Node memory) {
+    function getRoot() external view treeNotEmpty returns (Node memory) {
         return tree[rootAddress];
     }
 
     /**
-     * @notice Returns the size of the tree (number of nodes)
+     * @notice Calculates the size of the tree (number of nodes)
+     * @return The size of the tree
      */
     function getTreeSize() public view treeNotEmpty returns (uint256) {
-        return getTreeSizeHelper(rootAddress);
+        return getSizeHelper(rootAddress);
     }
 
     /**
      * @notice Recursive helper function for finding the size of the tree
      *
-     *      - Traverse all nodes of the tree following a depth-first search pattern (O(n))
-     *      - Sum up the count of nodes in the tree
+     *      - Preorder traverse all nodes of the tree following a depth-first search pattern (O(n))
+     *      - If the node is a leaf return 1 else check for the presence of left and right children
+     *      - If the node has a right child but no left child, sum nodes on right subtree
+     *      - If the node has a left child but no right child, sum nodes on left subtree
+     *      - If the node has both left and right children, sum nodes on both subtrees
      *
      * @param nodeAddress The address of the current node
      */
-    function getTreeSizeHelper(bytes32 nodeAddress) internal view returns (uint256) {
+    function getSizeHelper(bytes32 nodeAddress) public view treeNotEmpty returns (uint256) {
         Node memory node = tree[nodeAddress];
         // If leaf node, having no children, return 1 representing this single node.
         if (node.left == 0 && node.right == 0) {
@@ -546,18 +556,122 @@ contract BinaryTree {
         } else {
             // If no left child, add 1 for current node to the count of nodes in the right subtree.
             if (node.left == 0) {
-                return 1 + getTreeSizeHelper(node.right);
+                return 1 + getSizeHelper(node.right);
                 // If no right child, add 1 for current node to the count of nodes in the left subtree.
             } else if (node.right == 0) {
-                return 1 + getTreeSizeHelper(node.left);
+                return 1 + getSizeHelper(node.left);
                 // If both left and right children, add 1 for current node to the count of nodes in both subtrees
             } else {
-                return 1 + getTreeSizeHelper(node.left) + getTreeSizeHelper(node.right);
+                return 1 + getSizeHelper(node.left) + getSizeHelper(node.right);
             }
         }
     }
 
-    // TODO: GET TREE HEIGHT FUNCTION
+    /**
+     * @notice Calculates the height (maximum depth) of the tree
+     *
+     *  The height of a binary tree is equal to the largest number of edges from the root to the
+     *  most distant leaf node.
+     *
+     * @return The height of the tree
+     */
+
+    function getTreeHeight() external view treeNotEmpty returns (uint256) {
+        return getHeightHelper(rootAddress);
+    }
+
+    /**
+     * @notice Recursive helper function for finding the height of the tree
+     *
+     *  The height of a node is the largest number of path edges from a leaf node to a target node:
+     *      - Postorder traverse all nodes of the tree following a depth-first search pattern (O(n))
+     *      - As the function returns from each recursive call, compare the heights received from
+     *        the left and right children and return the greater of the two values plus 1 for the
+     *        current node.
+     *      - Leaf nodes return 0, any node that has at least one child will return a value greater
+     *        representing the maximum height of the tree below that node, including the node.
+     *
+     * @param nodeAddress The address of the current node
+     * @return The height of the tree from given node
+     */
+
+    function getHeightHelper(bytes32 nodeAddress) public view treeNotEmpty returns (uint256) {
+        Node memory node = tree[nodeAddress];
+        // If leaf node, having no children, return 0 representing this single node.
+        if (node.left == 0 && node.right == 0) {
+            return 0;
+            // Else recursively call the function on the left and right subtrees
+        } else {
+            // Compute the depth of each subtree
+            uint256 leftDepth = getHeightHelper(node.left);
+            uint256 rightDepth = getHeightHelper(node.right);
+            // Height is the larger depth plus the current node
+            if (leftDepth > rightDepth) {
+                return leftDepth + 1;
+            } else {
+                return rightDepth + 1;
+            }
+        }
+    }
+
+    /**
+     * @notice Calculates the depth of a node in the tree
+     *
+     *  The depth of a node is the number of path edges from the root of a tree to that node.
+     *
+     * @param value The value of the node to find the depth of
+     * @return The depth of the node
+     */
+
+    function getDepth(uint256 value) external view treeNotEmpty returns (int256) {
+        return getDepthHelper(rootAddress, value);
+    }
+
+    /**
+     * @notice Recursive helper function for finding the depth of a node in the tree
+     *
+     *      - Preorder traverse nodes following a depth-first search pattern (O(n))
+     *      - If the value is equal to the current node, return 0
+     *      - Search the left sub-tree of the current node for the target value
+     *      - Move down a level in the tree, and each time the function finds the target value
+     *        within a child subtree, add 1 to the current dist value, which is returned from the
+     *        recursive call.
+     *      - If the target value wasn't found in the left sub-tree, search the right sub-tree with
+     *        the same process.
+     *      - If value not found in either subtree revert
+     *
+     * @param nodeAddress The address of the current node
+     * @param value The value of the node to find the depth of
+     */
+
+    function getDepthHelper(bytes32 nodeAddress, uint256 value) public view treeNotEmpty returns (int256) {
+        Node memory node = tree[nodeAddress];
+        // Initialize distance as -1
+        int256 dist = -1;
+
+        // Check if value is current node
+        if (node.value == value) {
+            return dist + 1;
+        }
+        // Search the left sub-tree of the current node for the target value.
+        dist = getDepthHelper(node.left, value);
+        // If the target node is found in the left sub-tree, return the distance from the current node to the target node.
+        if (dist >= 0) {
+            return dist + 1;
+        }
+        // If the target value wasn't found in the left sub-tree, Search the right sub-tree of the current node for the target value.
+        dist = getDepthHelper(node.right, value);
+        // If the target node is found in the right sub-tree, return the distance from the current node to the target node.
+        if (dist >= 0) {
+            return dist + 1;
+        }
+        // If the target value wasn't found in either subtree, revert.
+        if (dist == -1) {
+            revert ValueNotInTree();
+        }
+
+        return dist;
+    }
 
     //===================== VALIDATION ===================//
 
