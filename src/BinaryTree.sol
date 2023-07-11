@@ -675,7 +675,60 @@ contract BinaryTree {
 
     //===================== VALIDATION ===================//
 
-    // TODO: VALIDATE TREE FUNCTION
+    /**
+     * @notice Checks if the tree is a valid Binary Search Tree
+     *
+     *  A valid BST is defined as follows:
+     *      - The left subtree of a node contains only nodes with keys less than the node's key.
+     *      - The right subtree of a node contains only nodes with keys greater than the node's key
+     *      - Both the left and right subtrees must also be binary search trees.
+     *
+     * @return True if the tree is a valid Binary Search Tree
+     */
+    function isValidBST() external view returns (bool) {
+        return isValidBSTHelper(rootAddress);
+    }
+
+    /**
+     * @notice Recursive helper function for checking if the tree is a valid Binary Search Tree
+     *
+     *      - Validate the tree using depth-first search (O(n))
+     *      - If node is empty, considered valid BST
+     *      - If the node has left child, check if max of left is great than the current node
+     *      - If the node has right child, check if min of right is less than the current node
+     *      - If either of these conditions is met, it's a violation of the BST property, and the
+     *        function returns false.
+     *      - Recursively call function on the left and right child nodes. If either of these calls
+     *        returns false, it means the left or right subtree is not a valid BST.
+     *      - If all conditions are met, return true
+     *
+     * @param nodeAddress The address of the current node
+     * @return True if the tree is a valid Binary Search Tree
+     */
+
+    function isValidBSTHelper(bytes32 nodeAddress) public view returns (bool) {
+        Node memory node = tree[nodeAddress];
+        // If the node is empty, considered valid BST, return true
+        if (node.value == 0 && node.left == 0 && node.right == 0) {
+            return true;
+        }
+        // If the node has left child, check if max of left is great than the current node
+        if (node.left != 0 && findMax(node.left) > node.value) {
+            // If it is, return false
+            return false;
+        }
+        // If the node has right child, check if min of right is less than the current node
+        if (node.right != 0 && findMin(node.right) < node.value) {
+            // If it is, return false
+            return false;
+        }
+        // Return false if recursive calls on left or right are not valid BSTs
+        if (!isValidBSTHelper(node.left) || !isValidBSTHelper(node.right)) {
+            return false;
+        }
+        // If all conditions are met, return true
+        return true;
+    }
 
     //===================== INVERSRION ===================//
 
