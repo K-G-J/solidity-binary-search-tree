@@ -732,19 +732,51 @@ contract BinaryTree {
 
     //===================== INVERSRION ===================//
 
-    // TODO: INVERT TREE FUNCTION
+    /**
+     * @notice Inverts the tree
+     *
+     *  An inverted form of a Binary Tree is another Binary Tree with left and right children of
+     *  all non-leaf nodes interchanged (i.e. a mirror of the input tree)
+     *
+     * @dev If you invert a Binary Search Tree is will no longer be a valid Binary Search Tree.
+     * @return The root node of the inverted tree
+     */
+    function invertTree() external treeNotEmpty returns (Node memory) {
+        return invertTreeHelper(rootAddress);
+    }
 
     /**
-     * An inverted form of a Binary Tree is another Binary Tree with left and right children of all non-leaf nodes interchanged. You may also call it the mirror of the input tree.
-     * If you invert a Binary Search Tree is will no longer be a valid Binary Search Tree.
+     * @notice Recursive helper function for inverting the tree
+     *
+     *  Inversion (O(n)):
+     *      - Preorder Traversal, but with the additional twist that the left and right subtrees
+     *        are being swapped.
+     *      - If the node is not a leaf node, proceed to the swapping operation
+     *      - Swap the left and right children of the node
+     *      - Recursively apply the inversion operation to all nodes in the tree
+     *      - Return the node that was inverted. This is the node with the given nodeAddress, but
+     *        after having its children swapped and all its descendants inverted.
+     *
+     * @dev The order of the calls does not matter because both subtrees are inverted independently
+     * @param nodeAddress The address of the current node
+     * @return The root node of the inverted tree
      */
-
-    /*
-        * These are inversion functions.
-            - Invert the tree (average log(n)), worst case O(n)):
-                - Start at the root node (rootAddress)
-                - Invert the left subtree
-                - Invert the right subtree
-                - Swap the left and right pointers
-    */
+    function invertTreeHelper(bytes32 nodeAddress) internal returns (Node storage) {
+        Node storage node = tree[nodeAddress];
+        // If the node is not a leaf, swap the left and right children
+        if (node.left != 0 || node.right != 0) {
+            // Store the left child in a temporary variable
+            bytes32 temp = node.left;
+            node.left = node.right;
+            node.right = temp;
+            // Recursively call the function on the left and right children
+            if (node.left != 0) {
+                invertTreeHelper(node.left);
+            }
+            if (node.right != 0) {
+                invertTreeHelper(node.right);
+            }
+        }
+        return node;
+    }
 }
