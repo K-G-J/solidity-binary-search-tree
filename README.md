@@ -17,6 +17,9 @@ Includes code for:
 - Get the root of the tree
 - Get the size of the tree (number of nodes)
 - Get the height of the tree (largest number of edges from the root to the most distant leaf node)
+- Get the depth of a node in the tree (number of edges from root of tree to node)
+- Check if valid a Binary Search Tree
+- Invert the tree
 
 ## Binary Search Tree
 
