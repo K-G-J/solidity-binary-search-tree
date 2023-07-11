@@ -8,12 +8,13 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
  * @title BinaryTree
  * @dev This contract implements a Binary Search Tree data structure.
  *
- * A Binary Search Tree (BST) is a node-based binary tree data structure that has the following properties:
- * The left subtree of a node contains only nodes with values less than the node’s value.
- * The right subtree of a node contains only nodes with valuess greater than the node’s value.
- * Both the left and right subtrees must also be Binary Search Trees.
+ *  A Binary Search Tree (BST) is a node-based binary tree data structure that has the following
+ *  properties:
+ *      - The left subtree of a node contains only nodes with values less than the node’s value.
+ *      - The right subtree of a node contains only nodes with values greater than the node’s value.
+ *      - Both the left and right subtrees must also be Binary Search Trees.
  *
- * For this implementation, duplicate values will be allowed, and nodes with values that are the same as the root node’s will be in the root node’s right subtree.
+ * @dev For this implementation, duplicate values will be allowed, and nodes with values that are the same as the root node’s will be in the root node’s right subtree.
  */
 
 contract BinaryTree {
@@ -39,7 +40,8 @@ contract BinaryTree {
     //===================== MODIFIERS ===================//
 
     modifier treeNotEmpty() {
-        if (tree[rootAddress].value == 0 && tree[rootAddress].left == 0 && tree[rootAddress].right == 0) {
+        Node memory root = tree[rootAddress];
+        if (root.value == 0 && root.left == 0 && root.right == 0) {
             revert TreeIsEmpty();
         }
         _;
@@ -529,6 +531,17 @@ contract BinaryTree {
     }
 
     /**
+     * @notice Returns the node at the given address
+     */
+    function getNode(bytes32 nodeAddress) external view treeNotEmpty returns (Node memory) {
+        Node memory node = tree[nodeAddress];
+        if (node.value == 0 && node.left == 0 && node.right == 0) {
+            revert ValueNotInTree();
+        }
+        return tree[nodeAddress];
+    }
+
+    /**
      * @notice Calculates the size of the tree (number of nodes)
      * @return The size of the tree
      */
@@ -575,7 +588,6 @@ contract BinaryTree {
      *
      * @return The height of the tree
      */
-
     function getTreeHeight() external view treeNotEmpty returns (uint256) {
         return getHeightHelper(rootAddress);
     }
@@ -594,7 +606,6 @@ contract BinaryTree {
      * @param nodeAddress The address of the current node
      * @return The height of the tree from given node
      */
-
     function getHeightHelper(bytes32 nodeAddress) public view treeNotEmpty returns (uint256) {
         Node memory node = tree[nodeAddress];
         // If leaf node, having no children, return 0 representing this single node.
@@ -622,7 +633,6 @@ contract BinaryTree {
      * @param value The value of the node to find the depth of
      * @return The depth of the node
      */
-
     function getDepth(uint256 value) external view treeNotEmpty returns (int256) {
         return getDepthHelper(rootAddress, value);
     }
@@ -643,7 +653,6 @@ contract BinaryTree {
      * @param nodeAddress The address of the current node
      * @param value The value of the node to find the depth of
      */
-
     function getDepthHelper(bytes32 nodeAddress, uint256 value) public view treeNotEmpty returns (int256) {
         Node memory node = tree[nodeAddress];
         // Initialize distance as -1
@@ -705,7 +714,6 @@ contract BinaryTree {
      * @param nodeAddress The address of the current node
      * @return True if the tree is a valid Binary Search Tree
      */
-
     function isValidBSTHelper(bytes32 nodeAddress) public view returns (bool) {
         Node memory node = tree[nodeAddress];
         // If the node is empty, considered valid BST, return true
