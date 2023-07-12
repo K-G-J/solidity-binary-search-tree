@@ -104,9 +104,9 @@ contract BinaryTreeTest is Test {
     }
 
     function test__deleteParent() public buildTree {
-        binaryTree.deleteNode(3);
-
         BinaryTree.Node memory root = binaryTree.getRoot();
+
+        binaryTree.deleteNode(3);
 
         /**
          *             5
@@ -116,28 +116,64 @@ contract BinaryTreeTest is Test {
          *         2   6  8
          */
 
-        // console.log("root:", root.value); // 5
-        // console.log("root.left:", binaryTree.getNode(root.left).value); // 4
-        // console.log("root.right:", binaryTree.getNode(root.right).value); // 7
-        // console.log("root.left.left:", binaryTree.getNode(binaryTree.getNode(root.left).left).value); // 2
-        // console.log("root.left.right:", binaryTree.getNode(binaryTree.getNode(root.left).right).value); // 0
-        // console.log("root.right.left:", binaryTree.getNode(binaryTree.getNode(root.right).left).value); // 6
-        // console.log("root.right.right:", binaryTree.getNode(binaryTree.getNode(root.right).right).value); // 8
+        console.log("root:", root.value); // 5
+        console.log("root.left:", binaryTree.getNode(root.left).value); // 4
+        console.log("root.right:", binaryTree.getNode(root.right).value); // 7
+        console.log("root.left.left:", binaryTree.getNode(binaryTree.getNode(root.left).left).value); // 2
+        console.log("root.right.left:", binaryTree.getNode(binaryTree.getNode(root.right).left).value); // 6
+        console.log("root.right.right:", binaryTree.getNode(binaryTree.getNode(root.right).right).value); // 8
 
-        // assertEq(root.value, 5);
-        // assertEq(binaryTree.getNode(root.left).value, 4);
-        // assertEq(binaryTree.getNode(root.right).value, 7);
+        assertEq(root.value, 5);
+        assertEq(binaryTree.getNode(root.left).value, 4);
+        assertEq(binaryTree.getNode(root.right).value, 7);
 
-        // Deleted node
-        // assertEq(binaryTree.getNode(binaryTree.getNode(root.left).left).right, "");
-        // assertEq(binaryTree.getNode(binaryTree.getNode(root.left).left).value, 0);
+        // Deleted node should be empty
+        bytes32 deletedTreeLocation = binaryTree.getNode(root.left).right;
+        assertEq(deletedTreeLocation, "");
+        assertEq(deletedTreeLocation, 0);
 
-        // assertEq(binaryTree.getNode(binaryTree.getNode(root.left).left).value, 2);
-        // assertEq(binaryTree.getNode(binaryTree.getNode(root.right).left).value, 6);
-        // assertEq(binaryTree.getNode(binaryTree.getNode(root.right).right).value, 8);
+        assertEq(binaryTree.getNode(binaryTree.getNode(root.left).left).value, 2);
+        assertEq(binaryTree.getNode(binaryTree.getNode(root.right).left).value, 6);
+        assertEq(binaryTree.getNode(binaryTree.getNode(root.right).right).value, 8);
     }
 
-    function test__deleteRoot() public buildTree {}
+    function test__deleteRoot() public buildTree {
+        binaryTree.deleteNode(5);
 
-    function test__deleteValueNotInTreeReverts() public buildTree {}
+        /**
+         *             6
+         *            / \
+         *           3   7
+         *          / \   \
+         *         2  4   8
+         */
+
+        BinaryTree.Node memory root = binaryTree.getRoot();
+
+        console.log("root:", root.value); // 6
+        console.log("root.left:", binaryTree.getNode(root.left).value); // 3
+        console.log("root.right:", binaryTree.getNode(root.right).value); // 7
+        console.log("root.left.left:", binaryTree.getNode(binaryTree.getNode(root.left).left).value); // 2
+        console.log("root.left.right:", binaryTree.getNode(binaryTree.getNode(root.left).right).value); // 4
+        console.log("root.right.right:", binaryTree.getNode(binaryTree.getNode(root.right).right).value); // 8
+
+        assertEq(root.value, 6);
+        assertEq(binaryTree.getNode(root.left).value, 3);
+        assertEq(binaryTree.getNode(root.right).value, 7);
+        assertEq(binaryTree.getNode(binaryTree.getNode(root.left).left).value, 2);
+        assertEq(binaryTree.getNode(binaryTree.getNode(root.left).right).value, 4);
+        // Deleted node should be empty
+        bytes32 deletedTreeLocation = binaryTree.getNode(root.right).left;
+        assertEq(deletedTreeLocation, "");
+        assertEq(deletedTreeLocation, 0);
+
+        assertEq(binaryTree.getNode(binaryTree.getNode(root.right).right).value, 8);
+    }
+
+    function test__deleteNodeValueNotInTreeReverts() public buildTree {
+        vm.expectRevert(BinaryTree.ValueNotInTree.selector);
+        binaryTree.deleteNode(9);
+    }
+
+    //===================== TRAVERSAL TESTS ===================//
 }

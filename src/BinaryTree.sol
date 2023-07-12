@@ -69,7 +69,6 @@ contract BinaryTree {
             root.value = value;
             root.left = 0;
             root.right = 0;
-            tree[0] = root;
             rootAddress = generateId(value, 0);
             tree[rootAddress] = root;
             return rootAddress;
@@ -161,8 +160,8 @@ contract BinaryTree {
      *
      * @param value The value to be deleted
      */
-    function deleteNode(uint256 value) external treeNotEmpty returns (Node memory removedNode) {
-        removedNode = deleteNodeHelper(value, "", rootAddress);
+    function deleteNode(uint256 value) external treeNotEmpty {
+        deleteNodeHelper(value, "", rootAddress);
     }
 
     /**
@@ -171,14 +170,11 @@ contract BinaryTree {
      * @param parentAddress The address of the parent node
      * @param nodeAddress The address of the current node
      */
-    function deleteNodeHelper(uint256 value, bytes32 parentAddress, bytes32 nodeAddress)
-        internal
-        returns (Node memory removedNode)
-    {
+    function deleteNodeHelper(uint256 value, bytes32 parentAddress, bytes32 nodeAddress) internal {
         Node memory node = tree[nodeAddress];
         // If the value is equal to the current node's value, start node deletion
         if (node.value == value) {
-            removedNode = deleteLeaf(parentAddress, nodeAddress);
+            deleteLeaf(parentAddress, nodeAddress);
 
             // If the value is less than the current node's value, go left
         } else if (value < node.value) {
@@ -209,44 +205,44 @@ contract BinaryTree {
      * @param parentAddress The address of the parent node
      * @param nodeAddress The address of the node to be deleted
      */
-    function deleteLeaf(bytes32 parentAddress, bytes32 nodeAddress) internal returns (Node memory node) {
+    function deleteLeaf(bytes32 parentAddress, bytes32 nodeAddress) internal {
         Node memory parent = tree[parentAddress];
-        node = tree[nodeAddress];
+        Node memory node = tree[nodeAddress];
 
-        // If the node has two children, replace the node with the maximum left subtree value
+        // If the node has two children, replace the node with the minimum right subtree value
         if (node.left != 0 && node.right != 0) {
             // Find the minimum value in the right subtree
             uint256 minRightValue = findMin(node.right);
-            // Delete the leaf with the minimum value from the right subtree
-            deleteNodeHelper(minRightValue, nodeAddress, node.left);
             // Update the node to have the minimum value from the right subtree
             node.value = minRightValue;
             tree[nodeAddress] = node;
+            // Delete the leaf with the minimum value from the right subtree
+            deleteNodeHelper(minRightValue, nodeAddress, node.right);
 
-            // If the node has only a left child, update so parent points to left child and set the node to null (0)
+            // If the node has only a left child, update so parent points to left child and delete the node
         } else if (node.left != 0) {
             bytes32 leftChild = node.left;
             if (parent.left == nodeAddress) {
                 parent.left = leftChild;
                 tree[parentAddress] = parent;
-                tree[nodeAddress] = Node(0, 0, 0);
+                delete tree[nodeAddress];
             } else {
                 parent.right = leftChild;
                 tree[parentAddress] = parent;
-                tree[nodeAddress] = Node(0, 0, 0);
+                delete tree[nodeAddress];
             }
 
-            // If the node has only a right child, update so parent points to right child and set the node to null (0)
+            // If the node has only a right child, update so parent points to right child and delete the node
         } else if (node.right != 0) {
             bytes32 rightChild = node.right;
             if (parent.left == nodeAddress) {
                 parent.left = rightChild;
                 tree[parentAddress] = parent;
-                tree[nodeAddress] = Node(0, 0, 0);
+                delete tree[nodeAddress];
             } else {
                 parent.right = rightChild;
                 tree[parentAddress] = parent;
-                tree[nodeAddress] = Node(0, 0, 0);
+                delete tree[nodeAddress];
             }
 
             // If the leaf has no children, delete the leaf and set the parent's child pointer to null (0)
@@ -258,8 +254,8 @@ contract BinaryTree {
                 parent.right = 0;
                 tree[parentAddress] = parent;
             }
-            // Set the node to null (0)
-            tree[nodeAddress] = Node(0, 0, 0);
+            // Delete the leaf
+            delete tree[nodeAddress];
         }
     }
 
