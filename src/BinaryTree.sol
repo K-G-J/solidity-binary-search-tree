@@ -35,7 +35,7 @@ contract BinaryTree {
 
     mapping(bytes32 nodeAddress => Node) public tree;
 
-    bytes32 private rootAddress;
+    bytes32 public rootAddress;
 
     //===================== MODIFIERS ===================//
 
