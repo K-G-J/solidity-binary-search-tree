@@ -37,6 +37,10 @@ contract BinaryTree {
 
     bytes32 public rootAddress;
 
+    uint256[] private preorder;
+    uint256[] private inorder;
+    uint256[] private postorder;
+
     //===================== MODIFIERS ===================//
 
     modifier treeNotEmpty() {
@@ -266,7 +270,8 @@ contract BinaryTree {
      * @return An array of the values in the tree preorder
      */
     function displayPreorder() external treeNotEmpty returns (uint256[] memory) {
-        return displayPreorderHelper(rootAddress, 0);
+        displayPreorderHelper(rootAddress);
+        return preorder;
     }
 
     /**
@@ -278,24 +283,19 @@ contract BinaryTree {
      *      - Traverse the right subtree, i.e., call Preorder(right->subtree)
      *
      * @param nodeAddress The address of the current node
-     * @param index The index of the current node value in return array
-     * @return An array of the values in the tree in preorder
      */
-    function displayPreorderHelper(bytes32 nodeAddress, uint256 index) internal returns (uint256[] memory) {
+    function displayPreorderHelper(bytes32 nodeAddress) internal {
         Node memory node = tree[nodeAddress];
-        uint256 size = getTreeSize();
-        uint256[] memory values = new uint256[](size);
-        // Add the current node value to the array (0 will be the root)
-        values[index] = node.value;
+        // Add the current node value to the array
+        preorder.push(node.value);
         // Keep traversing the left subtrees
         if (node.left != 0) {
-            displayPreorderHelper(node.left, index + 1);
+            displayPreorderHelper(node.left);
         }
         // After, traverse the right subtrees
         if (node.right != 0) {
-            displayPreorderHelper(node.right, index + 1);
+            displayPreorderHelper(node.right);
         }
-        return values;
     }
 
     /**
@@ -304,7 +304,8 @@ contract BinaryTree {
      * @return An array of the values in the tree inorder
      */
     function displayInorder() external treeNotEmpty returns (uint256[] memory) {
-        return displayInorderHelper(rootAddress, 0);
+        displayInorderHelper(rootAddress);
+        return inorder;
     }
 
     /**
@@ -316,24 +317,19 @@ contract BinaryTree {
      *      - Traverse the right subtree, i.e., call Inorder(right->subtree)
      *
      * @param nodeAddress The address of the current node
-     * @param index The index of the current node value in return array
-     * @return An array of the values in the tree inorder
      */
-    function displayInorderHelper(bytes32 nodeAddress, uint256 index) internal returns (uint256[] memory) {
+    function displayInorderHelper(bytes32 nodeAddress) internal {
         Node memory node = tree[nodeAddress];
-        uint256 size = getTreeSize();
-        uint256[] memory values = new uint256[](size);
         // Keep traversing the left subtrees
         if (node.left != 0) {
-            displayInorderHelper(node.left, index + 1);
+            displayInorderHelper(node.left);
         }
         // Add the current node value to the array
-        values[index - 1] = node.value;
+        inorder.push(node.value);
         // After, traverse the right subtrees
         if (node.right != 0) {
-            displayInorderHelper(node.right, index + 1);
+            displayInorderHelper(node.right);
         }
-        return values;
     }
 
     /**
@@ -341,7 +337,8 @@ contract BinaryTree {
      * @return An array of the values in the tree postorder
      */
     function displayPostorder() external treeNotEmpty returns (uint256[] memory) {
-        return displayPostorderHelper(rootAddress, 0);
+        displayPostorderHelper(rootAddress);
+        return postorder;
     }
 
     /**
@@ -353,24 +350,19 @@ contract BinaryTree {
      *      - Visit the root
      *
      * @param nodeAddress The address of the current node
-     * @param index The index of the current node value in return array
-     * @return An array of the values in the tree postorder
      */
-    function displayPostorderHelper(bytes32 nodeAddress, uint256 index) internal returns (uint256[] memory) {
+    function displayPostorderHelper(bytes32 nodeAddress) internal {
         Node memory node = tree[nodeAddress];
-        uint256 size = getTreeSize();
-        uint256[] memory values = new uint256[](size);
         // Keep traversing the left subtrees
         if (node.left != 0) {
-            displayPostorderHelper(node.left, index + 1);
+            displayPostorderHelper(node.left);
         }
         // After, traverse the right subtrees
         if (node.right != 0) {
-            displayPostorderHelper(node.right, index + 1);
+            displayPostorderHelper(node.right);
         }
         // Add the current node value to the array
-        values[index - 1] = node.value;
-        return values;
+        postorder.push(node.value);
     }
 
     //===================== SEARCHING ===================//

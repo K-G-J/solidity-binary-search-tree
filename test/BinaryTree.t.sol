@@ -176,4 +176,42 @@ contract BinaryTreeTest is Test {
     }
 
     //===================== TRAVERSAL TESTS ===================//
+
+    function test__displayPreorder() public buildTree {
+        uint256[] memory preorder = binaryTree.displayPreorder();
+
+        assertEq(preorder[0], 5);
+        assertEq(preorder[1], 3);
+        assertEq(preorder[2], 2);
+        assertEq(preorder[3], 4);
+        assertEq(preorder[4], 7);
+        assertEq(preorder[5], 6);
+        assertEq(preorder[6], 8);
+    }
+
+    function test__displayInorder() public buildTree {
+        uint256[] memory inorder = binaryTree.displayInorder();
+
+        assertEq(inorder[0], 2);
+        assertEq(inorder[1], 3);
+        assertEq(inorder[2], 4);
+        assertEq(inorder[3], 5);
+        assertEq(inorder[4], 6);
+        assertEq(inorder[5], 7);
+        assertEq(inorder[6], 8);
+    }
+
+    function test__displayPostorder() public buildTree {
+        uint256[] memory postorder = binaryTree.displayPostorder();
+
+        assertEq(postorder[0], 2);
+        assertEq(postorder[1], 4);
+        assertEq(postorder[2], 3);
+        assertEq(postorder[3], 6);
+        assertEq(postorder[4], 8);
+        assertEq(postorder[5], 7);
+        assertEq(postorder[6], 5);
+    }
+
+    //===================== SEARCHING TESTS ===================//
 }
