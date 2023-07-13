@@ -231,6 +231,32 @@ contract BinaryTreeTest is Test {
         vm.expectRevert(BinaryTree.ValueNotInTree.selector);
         binaryTree.findElement(9);
     }
-}
 
-//===================== GETTER TESTS ===================//
+    //===================== GETTER TESTS ===================//
+
+    function test__getTreeMin() public buildTree {
+        uint256 min = binaryTree.getMin();
+        assertEq(min, 2);
+    }
+
+    function test__getSubtreeMin() public buildTree {
+        BinaryTree.Node memory root = binaryTree.getRoot();
+        bytes32 subTreeRoot = root.right; // 7
+
+        uint256 min = binaryTree.findMin(subTreeRoot);
+        assertEq(min, 6);
+    }
+
+    function test__getTreeMax() public buildTree {
+        uint256 max = binaryTree.getMax();
+        assertEq(max, 8);
+    }
+
+    function test__getSubtreeMax() public buildTree {
+        BinaryTree.Node memory root = binaryTree.getRoot();
+        bytes32 subTreeRoot = root.left; // 3
+
+        uint256 max = binaryTree.findMax(subTreeRoot);
+        assertEq(max, 4);
+    }
+}
