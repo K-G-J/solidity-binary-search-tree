@@ -234,6 +234,8 @@ contract BinaryTreeTest is Test {
 
     //===================== GETTER TESTS ===================//
 
+    /* Min and Max Tests */
+
     function test__getTreeMin() public buildTree {
         uint256 min = binaryTree.getMin();
         assertEq(min, 2);
@@ -269,4 +271,34 @@ contract BinaryTreeTest is Test {
         assertEq(min, 5);
         assertEq(max, 5);
     }
+
+    /* Get Tree Tests */
+
+    function test__getTree() public buildTree {
+        string memory tree = binaryTree.getTree();
+        console.log("tree:", tree); // 5(3(2)(4))(7(6)(8))
+        assertEq(tree, "5(3(2)(4))(7(6)(8))");
+    }
+
+    function test__getTreeEmptyNode() public buildTree {
+        binaryTree.insert(9);
+        string memory tree = binaryTree.getTree();
+        console.log("tree:", tree); // 5(3(2)(4))(7(6)(8()(9)))
+        /**
+         *          5
+         *         / \
+         *        3   7
+         *       / \ / \
+         *     2  4 6  8
+         *             \
+         *             9
+         */
+        assertEq(tree, "5(3(2)(4))(7(6)(8()(9)))");
+    }
+
+    /* Get Size Tests */
+
+    /* Get Height Tests */
+
+    /* Get Depth Tests */
 }
