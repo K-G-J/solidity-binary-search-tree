@@ -397,7 +397,7 @@ contract BinaryTreeTest is Test {
         assertTrue(isValid);
     }
 
-    //===================== INVERSRION ===================//
+    //===================== INVERSION TESTS ===================//
 
     function test__invertTree() public buildTree {
         binaryTree.invertTree();
