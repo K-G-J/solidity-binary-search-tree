@@ -290,8 +290,8 @@ contract BinaryTreeTest is Test {
          *        3   7
          *       / \ / \
          *     2  4 6  8
-         *             \
-         *             9
+         *              \
+         *              9
          */
         assertEq(tree, "5(3(2)(4))(7(6)(8()(9)))");
     }
