@@ -682,8 +682,8 @@ contract BinaryTree {
      *
      * @return True if the tree is a valid Binary Search Tree
      */
-    function isValidBST() external view returns (bool) {
-        return isValidBSTHelper(rootAddress);
+    function validateBST() external view returns (bool) {
+        return validateBSTHelper(rootAddress);
     }
 
     /**
@@ -702,7 +702,7 @@ contract BinaryTree {
      * @param nodeAddress The address of the current node
      * @return True if the tree is a valid Binary Search Tree
      */
-    function isValidBSTHelper(bytes32 nodeAddress) public view returns (bool) {
+    function validateBSTHelper(bytes32 nodeAddress) public view returns (bool) {
         Node memory node = tree[nodeAddress];
         // If the node is empty, considered valid BST, return true
         if (node.value == 0 && node.left == 0 && node.right == 0) {
@@ -719,7 +719,7 @@ contract BinaryTree {
             return false;
         }
         // Return false if recursive calls on left or right are not valid BSTs
-        if (!isValidBSTHelper(node.left) || !isValidBSTHelper(node.right)) {
+        if (!validateBSTHelper(node.left) || !validateBSTHelper(node.right)) {
             return false;
         }
         // If all conditions are met, return true

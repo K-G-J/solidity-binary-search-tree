@@ -384,4 +384,63 @@ contract BinaryTreeTest is Test {
         int256 depth = binaryTree.getDepth(5);
         assertEq(depth, 0);
     }
+
+    //===================== VALIDATION TESTS ===================//
+
+    function test__validateTree() public buildTree {
+        bool isValid = binaryTree.validateBST();
+        assertTrue(isValid);
+    }
+
+    function test__validateTreeEmptyTree() public {
+        bool isValid = binaryTree.validateBST();
+        assertTrue(isValid);
+    }
+
+    //===================== INVERSRION ===================//
+
+    function test__invertTree() public buildTree {
+        binaryTree.invertTree();
+
+        /**
+         *             5
+         *            / \
+         *           7   3
+         *          / \ / \
+         *         8  6 4  2
+         */
+
+        BinaryTree.Node memory root = binaryTree.getRoot();
+
+        console.log("root:", root.value); // 5
+        console.log("root.left:", binaryTree.getNode(root.left).value); // 7
+        console.log("root.right:", binaryTree.getNode(root.right).value); // 3
+        console.log("root.left.left:", binaryTree.getNode(binaryTree.getNode(root.left).left).value); // 8
+        console.log("root.left.right:", binaryTree.getNode(binaryTree.getNode(root.left).right).value); // 6
+        console.log("root.right.left:", binaryTree.getNode(binaryTree.getNode(root.right).left).value); // 4
+        console.log("root.right.right:", binaryTree.getNode(binaryTree.getNode(root.right).right).value); // 2
+
+        assertEq(root.value, 5);
+        assertEq(binaryTree.getNode(root.left).value, 7);
+        assertEq(binaryTree.getNode(root.right).value, 3);
+        assertEq(binaryTree.getNode(binaryTree.getNode(root.left).left).value, 8);
+        assertEq(binaryTree.getNode(binaryTree.getNode(root.left).right).value, 6);
+        assertEq(binaryTree.getNode(binaryTree.getNode(root.right).left).value, 4);
+        assertEq(binaryTree.getNode(binaryTree.getNode(root.right).right).value, 2);
+    }
+
+    function test__invertTreeNoLongerValidBST() public buildTree {
+        binaryTree.invertTree();
+
+        /**
+         *             5
+         *            / \
+         *           7   3
+         *          / \ / \
+         *         8  6 4  2
+         */
+
+        bool isValid = binaryTree.validateBST();
+        assertFalse(isValid);
+    }
 }
