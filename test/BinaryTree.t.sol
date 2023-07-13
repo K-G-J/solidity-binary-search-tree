@@ -259,4 +259,14 @@ contract BinaryTreeTest is Test {
         uint256 max = binaryTree.findMax(subTreeRoot);
         assertEq(max, 4);
     }
+
+    function test__getMinAndMaxOnlyRoot() public {
+        binaryTree.insert(5);
+
+        uint256 min = binaryTree.getMin();
+        uint256 max = binaryTree.getMax();
+
+        assertEq(min, 5);
+        assertEq(max, 5);
+    }
 }
