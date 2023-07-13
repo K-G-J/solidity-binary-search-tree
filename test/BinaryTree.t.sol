@@ -70,6 +70,13 @@ contract BinaryTreeTest is Test {
         binaryTree.insert(4);
         binaryTree.insert(6);
         binaryTree.insert(8);
+        /**
+         *             5
+         *            / \
+         *           3   7
+         *          / \ / \
+         *         2  4 6  8
+         */
         _;
     }
 
@@ -289,7 +296,7 @@ contract BinaryTreeTest is Test {
          *         / \
          *        3   7
          *       / \ / \
-         *     2  4 6  8
+         *      2  4 6  8
          *              \
          *              9
          */
@@ -298,7 +305,83 @@ contract BinaryTreeTest is Test {
 
     /* Get Size Tests */
 
+    function test__getTreeSize() public buildTree {
+        uint256 size = binaryTree.getTreeSize();
+        assertEq(size, 7);
+
+        binaryTree.insert(9);
+        size = binaryTree.getTreeSize();
+        assertEq(size, 8);
+
+        binaryTree.deleteNode(9);
+        size = binaryTree.getTreeSize();
+        assertEq(size, 7);
+    }
+
+    function test__getSubtreeSize() public buildTree {
+        BinaryTree.Node memory root = binaryTree.getRoot();
+        bytes32 subTreeRoot = root.left; // 3
+
+        uint256 size = binaryTree.getSizeHelper(subTreeRoot);
+        assertEq(size, 3);
+    }
+
+    function test__getTreeSizeOnlyRoot() public {
+        binaryTree.insert(5);
+
+        uint256 size = binaryTree.getTreeSize();
+        assertEq(size, 1);
+    }
+
     /* Get Height Tests */
 
+    function test__getTreeHeight() public buildTree {
+        uint256 height = binaryTree.getTreeHeight();
+        assertEq(height, 2);
+
+        binaryTree.insert(9);
+        height = binaryTree.getTreeHeight();
+        assertEq(height, 3);
+
+        binaryTree.deleteNode(9);
+        height = binaryTree.getTreeHeight();
+        assertEq(height, 2);
+    }
+
+    function test__getSubtreeHeight() public buildTree {
+        BinaryTree.Node memory root = binaryTree.getRoot();
+        bytes32 subTreeRoot = root.left; // 3
+
+        uint256 height = binaryTree.getHeightHelper(subTreeRoot);
+        assertEq(height, 1);
+    }
+
+    function test__getTreeHeightOnlyRoot() public {
+        binaryTree.insert(5);
+
+        uint256 height = binaryTree.getTreeHeight();
+        assertEq(height, 0);
+    }
+
     /* Get Depth Tests */
+
+    function test__getTreeDepth() public buildTree {
+        uint256 leafValue = 2;
+        int256 depth = binaryTree.getDepth(leafValue);
+        assertEq(depth, 2);
+    }
+
+    function test__getSubtreeDepth() public buildTree {
+        BinaryTree.Node memory root = binaryTree.getRoot();
+        bytes32 subTreeRoot = root.left; // 3
+        uint256 leafValue = 2;
+
+        int256 depth = binaryTree.getDepthHelper(subTreeRoot, leafValue);
+        assertEq(depth, 1);
+    }
+
+    function test__getRootDepth() public buildTree {
+        int256 depth = binaryTree.getDepth(5);
+        assertEq(depth, 0);
+    }
 }
