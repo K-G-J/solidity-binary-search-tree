@@ -214,4 +214,23 @@ contract BinaryTreeTest is Test {
     }
 
     //===================== SEARCHING TESTS ===================//
+
+    function test__findElementEmptyTreeReverts() public {
+        vm.expectRevert(BinaryTree.TreeIsEmpty.selector);
+        binaryTree.findElement(5);
+    }
+
+    function test__findElement() public buildTree {
+        (bool found, BinaryTree.Node memory node) = binaryTree.findElement(5);
+
+        assertTrue(found);
+        assertEq(node.value, 5);
+    }
+
+    function test__findElementValueNotInTreeReverts() public buildTree {
+        vm.expectRevert(BinaryTree.ValueNotInTree.selector);
+        binaryTree.findElement(9);
+    }
 }
+
+//===================== GETTER TESTS ===================//
